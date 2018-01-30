@@ -1,0 +1,72 @@
+tosca_definitions_version: tosca_simple_yaml_1_1
+description: Template for deploying a NodeJS WebApplication
+metadata:
+  template_name: simple-task-js-template
+  template_author: stupro-toscana
+  template_version: 1.0
+
+topology_template:
+
+  node_templates:
+    simple_task_js:
+      type: tosca.nodes.WebApplication
+      requirements:
+        - host: node_srv
+      capabilities:
+        app_endpoint:
+          protocol: http
+          port: 3000
+      interfaces:
+        Standard:
+          create:
+            implementation:
+              primary: app.zip
+
+    node_srv:
+      type: tosca.nodes.WebServer.NodeJS
+      requirements:
+        - host: app_server
+
+    app_server:
+      type: tosca.nodes.Compute
+      capabilities:
+        host:
+          properties:
+            num_cpus: 1
+            disk_size: 4 GB
+            mem_size: 512 MB
+        os:
+          properties:
+            type: linux
+            distribution: ubuntu
+            version: 16.04
+
+    redis:
+      type: tosca.nodes.SoftwareComponent
+      requirements:
+        host: redis_compute
+
+
+    redis_compute:
+      type: tosca.nodes.Compute
+      capabilities:
+        host:
+          properties:
+            num_cpus: 1
+            disk_size: 4 GB
+            mem_size: 512 MB
+        os:
+          properties:
+            type: linux
+            distribution: ubuntu
+            version: 16.04
+
+  outputs:
+    public_address:
+      type: string
+      description: Public address of the server
+      value: { get_attribute: [ app_server, public_address ] }
+    port:
+      description: Port of the SimpleTaskAppJS
+      type: string
+      value: { get_attribute: [ simple_task_js, port ] }
