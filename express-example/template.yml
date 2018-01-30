@@ -12,6 +12,11 @@ topology_template:
       type: tosca.nodes.WebApplication
       requirements:
         - host: node_srv
+        - database_endpoint:
+            node: redis_db
+            capability: database_endpoint
+            relationship: ConnectsTo
+        #- database_endpoint: redis_db
       capabilities:
         app_endpoint:
           protocol: http
@@ -41,11 +46,27 @@ topology_template:
             distribution: ubuntu
             version: 16.04
 
-    redis:
-      type: tosca.nodes.SoftwareComponent
+    redis_db:
+      type: tosca.nodes.Database
+      properties:
+        name: 0
       requirements:
-        host: redis_compute
+        - host: redis
 
+    redis:
+      type: tosca.nodes.DBMS
+      properties:
+        port: 6379
+      requirements:
+        - host: redis_compute
+      interfaces:
+        Standard:
+          create:
+            implementation:
+              primary: install_redis.sh
+          start:
+            implementation:
+              primary: start_redis.sh
 
     redis_compute:
       type: tosca.nodes.Compute
@@ -64,7 +85,7 @@ topology_template:
   outputs:
     public_address:
       type: string
-      description: Public address of the server
+      description: Public address of the server hosting the SimpleTaskAppJS
       value: { get_attribute: [ app_server, public_address ] }
     port:
       description: Port of the SimpleTaskAppJS
