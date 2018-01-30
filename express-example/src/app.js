@@ -1,12 +1,12 @@
 var express = require('express');
+const redisjs = require('redis');
 var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
-var index = require('./routes/index');
-var users = require('./routes/users');
+var redisUrl = process.env.REDIS_URL;
 
 var app = express();
 
@@ -22,8 +22,36 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', index);
-app.use('/users', users);
+var redis = redisjs.createClient(redisUrl);
+
+redis.on('connect', () => {
+    console.log('Connection to Redis established!');
+});
+
+var router = express.Router();
+
+var tasks = [];
+
+router.get('/', function(req, res, next) {
+  redis.lrange("tasks",0,-1, (err, repl) => {
+    if(err != null) {
+      res.render('index', { title: 'SimpleTaskAppJS', taskList: tasks });
+    }
+    res.render('index', { title: 'SimpleTaskAppJS', taskList: repl });
+  });
+
+});
+
+router.post('/submit', function(req, res, next) {
+  let task = req.body.task;
+  if(task != undefined || task != null) {
+    var reso = redis.rpush("tasks",task,redisjs.print);
+    console.log(reso);
+    res.redirect("/");
+  }
+});
+
+app.use('/', router);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

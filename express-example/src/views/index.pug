@@ -1,0 +1,14 @@
+extends layout
+
+block content
+  h1= title
+  h2() Submit Task
+  form(method='POST' action='/submit')
+    div.form-group
+      label(for='task') Task Name:
+      input#name.form-control(type='text', placeholder='My Task' name='task')
+    button(type='primary') Send
+  h2() Tasks
+  ul
+    each val, index in taskList
+      li= index + ': ' + val
