@@ -25,12 +25,22 @@ topology_template:
         Standard:
           create:
             implementation:
-              primary: app.zip
+              primary: simpletaskapp_js/install_stajs.sh
+              dedpendencies:
+                - simpletaskapp_js/stajs.zip
+          start:
+            implementation:
+              primary: simpletaskapp_js/start_stajs.sh
 
     node_srv:
       type: tosca.nodes.WebServer.NodeJS
       requirements:
         - host: app_server
+      interfaces:
+        Standard:
+          create:
+            implementation:
+              primary: node/install_nodejs.sh
 
     app_server:
       type: tosca.nodes.Compute
