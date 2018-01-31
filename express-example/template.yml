@@ -63,10 +63,12 @@ topology_template:
         Standard:
           create:
             implementation:
-              primary: install_redis.sh
+              primary: redis/install_redis.sh
+              dependencies:
+                - redis/redis.conf
           start:
             implementation:
-              primary: start_redis.sh
+              primary: redis/start_redis.sh
 
     redis_compute:
       type: tosca.nodes.Compute
