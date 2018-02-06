@@ -31,8 +31,13 @@ public class Translator {
                     .field("text", encodedContent)
                     .asJson();
 
-            JSONObject obj = response.getBody().getObject();
-            String translation = obj.getJSONObject("contents").getString("translated");
+            String translation;
+            if (response.getStatus() != 429) {
+                JSONObject obj = response.getBody().getObject();
+                translation = obj.getJSONObject("contents").getString("translated");
+            } else {
+                translation = task.content + " [translation rate limit reached]";
+            }
             task.content = translation;
         } catch (Exception e) {
             System.err.println("Error while translating task");

@@ -10,7 +10,7 @@ public class Main {
     public static final String ENV_INTERVAL = "update_interval";
 
     public static void main(String[] args) {
-        String apiKey = getEnvSecure(ENV_API_KEY);
+        String apiKey = System.getenv(ENV_API_KEY);
         String intervalString = System.getenv(ENV_INTERVAL);
 
         int interval;
