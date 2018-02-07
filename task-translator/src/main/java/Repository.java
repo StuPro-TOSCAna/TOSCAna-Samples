@@ -30,7 +30,7 @@ public class Repository {
             System.err.println("Failed to connect to database. Trying again in 1 min");
             e.printStackTrace();
             try {
-                Thread.sleep(60000);
+                Thread.sleep(10000);
             } catch (InterruptedException e1) {
                 e1.printStackTrace();
             }
