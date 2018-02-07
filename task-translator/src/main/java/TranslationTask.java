@@ -1,10 +1,16 @@
 public class TranslationTask extends Task {
 
-    public final TargetLanguage targetLanguage;
-    private String translatedContent;
+    public final String targetLanguage;
+    public String translatedContent;
 
-    public TranslationTask(Task task, TargetLanguage targetLanguage) {
-        super(task.id, task.content.split(" ", 2)[1]);
+    public TranslationTask(int id, String content, String targetLanguage) {
+        super(id, content);
         this.targetLanguage = targetLanguage;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("[TranslationTask: id='%s', content='%s', translation='%s', targetLanguage='%s']",
+                id, content, translatedContent, targetLanguage);
     }
 }

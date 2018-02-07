@@ -13,12 +13,13 @@ public class Updater implements Runnable {
     }
 
     public void run() {
+        System.out.println("Starting update loop");
         while (!Thread.interrupted()) {
             try {
-                Thread.sleep(updateIntervalMS);
                 List<TranslationTask> tasks = repository.getTranslationTasks();
                 translator.translate(tasks);
                 repository.updateTasks(tasks);
+                Thread.sleep(updateIntervalMS);
             } catch (InterruptedException e) {
             }
         }

@@ -17,7 +17,7 @@ public class Main {
         try {
             interval = Integer.parseInt(intervalString);
         } catch (NumberFormatException e) {
-            interval = 10;
+            interval = 3;
         }
 
         String host = getEnvSecure(Main.ENV_DB_HOST);

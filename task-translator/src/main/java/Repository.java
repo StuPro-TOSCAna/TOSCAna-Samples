@@ -1,5 +1,6 @@
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -39,7 +40,9 @@ public class Repository {
 
     public List<TranslationTask> getTranslationTasks() {
         List<Task> tasks = getNewTasks();
-        return getTranslationTasks(tasks);
+        List<TranslationTask> translationTasks = getTranslationTasks(tasks);
+        System.out.printf("Found %s new tasks; %s need translation\n", tasks.size(), translationTasks.size());
+        return translationTasks;
     }
 
     private List<Task> getNewTasks() {
@@ -68,28 +71,31 @@ public class Repository {
     private List<TranslationTask> getTranslationTasks(List<Task> tasks) {
         List<TranslationTask> translationTasks = new ArrayList<>();
         for (Task task : tasks) {
-            TargetLanguage targetLanguage;
-            if (task.content.startsWith("\\yoda ")) {
-                targetLanguage = TargetLanguage.YODA;
-            } else if (task.content.startsWith("\\pirate ")) {
-                targetLanguage = TargetLanguage.PIRATE;
-            } else {
-                break;
+            if (task.content.startsWith("/")) {
+                String[] tokens = task.content.substring(1).split(" ", 2);
+                if (tokens.length >= 1) {
+                    String targetLanguage = tokens[0];
+                    String strippedContent = tokens.length > 1 ? tokens[1] : "";
+                    translationTasks.add(new TranslationTask(task.id, strippedContent, targetLanguage));
+                }
             }
-            translationTasks.add(new TranslationTask(task, targetLanguage));
         }
         return translationTasks;
     }
 
     public void updateTasks(List<TranslationTask> translationTasks) {
         for (TranslationTask task : translationTasks) {
+            System.out.printf("Writing task %s to db\n", task);
             try {
-                Statement statement = conn.createStatement();
-                String query = String.format("update tasks set task = '%s' where id = %s", task.content, task.id);
-                statement.executeQuery(query);
+                String query = "update tasks set task = ? where id = ?";
+                PreparedStatement statement = conn.prepareStatement(query);
+                statement.setString(1, task.translatedContent);
+                statement.setInt(2, task.id);
+                statement.executeUpdate();
                 statement.close();
+                System.out.println("Successfully updated db");
             } catch (SQLException e) {
-                System.err.println("failed to update tasks");
+                System.err.printf("failed to update task %s\n", task);
                 e.printStackTrace();
             }
         }

@@ -1,4 +1,3 @@
-import java.net.URLEncoder;
 import java.util.List;
 
 import com.mashape.unirest.http.HttpResponse;
@@ -23,26 +22,37 @@ public class Translator {
     }
 
     private void translate(TranslationTask task) {
-        try {
-            String encodedContent = URLEncoder.encode(task.content, "UTF-8");
-            String call = String.format("%s/%s.json", TRANSLATOR_ENDPOINT, task.targetLanguage.name);
-            HttpResponse<JsonNode> response = Unirest.post(call)
-                    .header("X-Funtranslations-Api-Secret", this.apiKey)
-                    .field("text", encodedContent)
-                    .asJson();
+        String translation;
+        System.out.printf("Translating task %s\n", task);
+        if ("languages".equals(task.targetLanguage)) {
+            task.translatedContent = "[translator] Available languages: yoda, pirate, minion, sindarin, sith, " +
+                    "oldenglish, shakespeare, klingon, jive, leetspeak";
+        } else {
+            try {
+                String call = String.format("%s%s.json", TRANSLATOR_ENDPOINT, task.targetLanguage);
+                HttpResponse<JsonNode> response = Unirest.post(call)
+                        .header("X-Funtranslations-Api-Secret", this.apiKey)
+                        .field("text", task.content)
+                        .asJson();
 
-            String translation;
-            if (response.getStatus() != 429) {
-                JSONObject obj = response.getBody().getObject();
-                translation = obj.getJSONObject("contents").getString("translated");
-            } else {
-                translation = task.content + " [translation rate limit reached]";
+                if (response.getStatus() == 404) {
+                    System.out.printf("Unknown target language %s\n", task.targetLanguage);
+                    translation = String.format("%s [unknown target language '%s']", task.content, task.targetLanguage);
+                } else if (response.getStatus() == 429) {
+                    System.out.println("Rate limit reached");
+                    translation = task.content + " [translation rate limit reached]";
+                } else {
+                    System.out.println(response.getBody().getObject());
+                    JSONObject obj = response.getBody().getObject();
+                    translation = obj.getJSONObject("contents").getString("translated");
+                    System.out.println("Translation successful");
+                }
+                task.translatedContent = translation;
+            } catch (Exception e) {
+                System.err.println("Error while translating task");
+                e.printStackTrace();
+                task.translatedContent = task.content + " [translation failed]";
             }
-            task.content = translation;
-        } catch (Exception e) {
-            System.err.println("Error while translating task");
-            e.printStackTrace();
-            task.content = task.content + " [translation failed]";
         }
     }
 }
