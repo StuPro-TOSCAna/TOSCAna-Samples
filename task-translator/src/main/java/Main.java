@@ -1,10 +1,10 @@
 public class Main {
 
-    public static final String ENV_DB_HOST = "db_host";
-    public static final String ENV_DB_PORT = "db_port";
-    public static final String ENV_DB_USER = "db_user";
-    public static final String ENV_DB_PASSWORD = "db_password";
-    public static final String ENV_DB_NAME = "db_name";
+    public static final String ENV_DB_HOST = "database_host";
+    public static final String ENV_DB_PORT = "database_port";
+    public static final String ENV_DB_USER = "database_user";
+    public static final String ENV_DB_PASSWORD = "database_password";
+    public static final String ENV_DB_NAME = "database_name";
 
     public static final String ENV_API_KEY = "api_key";
     public static final String ENV_INTERVAL = "update_interval";
